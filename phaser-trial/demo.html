@@ -37,6 +37,23 @@ var timerText = "";
 var gameStarted = 0;
 var halfSecondCounter = 0;
 
+function createStar(stars, x, y) {
+	var star = stars.create(x, y, 'star');
+	star.body.gravity.y = 500;
+	star.body.bounce.y = 1;
+}
+
+function createLedge(platforms, x) {
+	// Here we create the ground.
+    var ground = platforms.create(x, game.world.height - 64, 'ground');
+    
+    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
+    ground.scale.setTo(2, 2);
+
+    //  This stops it from falling away when you jump on it
+    ground.body.immovable = true;
+}
+
 function create() {
 	gameStarted = game.time.now;
     //  We're going to be using physics, so enable the Arcade Physics system
@@ -51,15 +68,14 @@ function create() {
 
     //  We will enable physics for any object that is created in this group
     platforms.enableBody = true;
+	createLedge(platforms, 0);
+	createLedge(platforms, 400);
+	createLedge(platforms, 800);
+	createLedge(platforms, 1200);
+	createLedge(platforms, 1600);
+    
 
-    // Here we create the ground.
-    var ground = platforms.create(0, game.world.height - 64, 'ground');
-
-    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    ground.scale.setTo(2, 2);
-
-    //  This stops it from falling away when you jump on it
-    ground.body.immovable = true;
+    
 
     //  Now let's create two ledges
     var ledge = platforms.create(400, 400, 'ground');
@@ -87,49 +103,49 @@ function create() {
 
     //  We will enable physics for any star that is created in this group
     stars.enableBody = true;
-	var star = stars.create(70, 100, 'star');
-	var star = stars.create(170, 100, 'star');
-	var star = stars.create(270, 100, 'star');
-	var star = stars.create(370, 100, 'star');
-	var star = stars.create(470, 100, 'star');
-	var star = stars.create(570, 100, 'star');	
-	var star = stars.create(670, 100, 'star');
-	var star = stars.create(770, 100, 'star');
-	var star = stars.create(870, 100, 'star');
-	var star = stars.create(970, 100, 'star');
-	var star = stars.create(1070, 100, 'star');
-	var star = stars.create(1170, 100, 'star');
-	var star = stars.create(1270, 100, 'star');
-	var star = stars.create(1370, 100, 'star');
-	var star = stars.create(1470, 100, 'star');
-	var star = stars.create(1570, 100, 'star');
-	var star = stars.create(1670, 100, 'star');
-	var star = stars.create(1770, 100, 'star');
-	var star = stars.create(1870, 100, 'star');
-	var star = stars.create(1870, 200, 'star');	
-	var star = stars.create(1870, 300, 'star');
-	var star = stars.create(1870, 400, 'star');
-	var star = stars.create(1870, 500, 'star');
-	var star = stars.create(1770, 500, 'star');
-	var star = stars.create(1670, 500, 'star');
-	var star = stars.create(1570, 500, 'star');
-	var star = stars.create(1470, 500, 'star');
-	var star = stars.create(1370, 500, 'star');
-	var star = stars.create(1270, 500, 'star');
-	var star = stars.create(1170, 500, 'star');
-	var star = stars.create(1070, 500, 'star');
-	var star = stars.create(970, 500, 'star');
-	var star = stars.create(870, 500, 'star');
-	var star = stars.create(770, 500, 'star');
-	var star = stars.create(670, 500, 'star');
-	var star = stars.create(570, 500, 'star');
-	var star = stars.create(470, 500, 'star');
-	var star = stars.create(370, 500, 'star');
-	var star = stars.create(270, 500, 'star');
-	var star = stars.create(170, 500, 'star');
-	var star = stars.create(70, 500, 'star');
+	createStar(stars, 70, 100);
+	createStar(stars, 170, 100);
+	createStar(stars, 270, 100);
+	createStar(stars, 370, 100);
+	createStar(stars, 470, 100);
+	createStar(stars, 570, 100);	
+	createStar(stars, 670, 100);
+	createStar(stars, 770, 100);
+	createStar(stars, 870, 100);
+	createStar(stars, 970, 100);
+	createStar(stars, 1070, 100);
+	createStar(stars, 1170, 100);
+	createStar(stars, 1270, 100);
+	createStar(stars, 1370, 100);
+	createStar(stars, 1470, 100);
+	createStar(stars, 1570, 100);
+	createStar(stars, 1670, 100);
+	createStar(stars, 1770, 100);
+	createStar(stars, 1870, 100);
+	createStar(stars, 1870, 200);	
+	createStar(stars, 1870, 300);
+	createStar(stars, 1870, 400);
+	createStar(stars, 1870, 500);
+	createStar(stars, 1770, 500);
+	createStar(stars, 1670, 500);
+	createStar(stars, 1570, 500);
+	createStar(stars, 1470, 500);
+	createStar(stars, 1370, 500);
+	createStar(stars, 1270, 500);
+	createStar(stars, 1170, 500);
+	createStar(stars, 1070, 500);
+	createStar(stars, 970, 500);
+	createStar(stars, 870, 500);
+	createStar(stars, 770, 500);
+	createStar(stars, 670, 500);
+	createStar(stars, 570, 500);
+	createStar(stars, 470, 500);
+	createStar(stars, 370, 500);
+	createStar(stars, 270, 500);
+	createStar(stars, 170, 500);
+	createStar(stars, 70, 500);
 	//  Let gravity do its thing
-//        star.body.gravity.y = 300;
+
 
     scoreText = game.add.text(684, 16, 'Lap: 0', { fontSize: '32px', fill: '#000' });
     timerText = game.add.text(16, 16, '00:00:00', { fontSize: '32px', fill: '#000' });
