@@ -87,9 +87,49 @@ function create() {
 
     //  We will enable physics for any star that is created in this group
     stars.enableBody = true;
-	var star = stars.create(70, 0, 'star');
+	var star = stars.create(70, 100, 'star');
+	var star = stars.create(170, 100, 'star');
+	var star = stars.create(270, 100, 'star');
+	var star = stars.create(370, 100, 'star');
+	var star = stars.create(470, 100, 'star');
+	var star = stars.create(570, 100, 'star');	
+	var star = stars.create(670, 100, 'star');
+	var star = stars.create(770, 100, 'star');
+	var star = stars.create(870, 100, 'star');
+	var star = stars.create(970, 100, 'star');
+	var star = stars.create(1070, 100, 'star');
+	var star = stars.create(1170, 100, 'star');
+	var star = stars.create(1270, 100, 'star');
+	var star = stars.create(1370, 100, 'star');
+	var star = stars.create(1470, 100, 'star');
+	var star = stars.create(1570, 100, 'star');
+	var star = stars.create(1670, 100, 'star');
+	var star = stars.create(1770, 100, 'star');
+	var star = stars.create(1870, 100, 'star');
+	var star = stars.create(1870, 200, 'star');	
+	var star = stars.create(1870, 300, 'star');
+	var star = stars.create(1870, 400, 'star');
+	var star = stars.create(1870, 500, 'star');
+	var star = stars.create(1770, 500, 'star');
+	var star = stars.create(1670, 500, 'star');
+	var star = stars.create(1570, 500, 'star');
+	var star = stars.create(1470, 500, 'star');
+	var star = stars.create(1370, 500, 'star');
+	var star = stars.create(1270, 500, 'star');
+	var star = stars.create(1170, 500, 'star');
+	var star = stars.create(1070, 500, 'star');
+	var star = stars.create(970, 500, 'star');
+	var star = stars.create(870, 500, 'star');
+	var star = stars.create(770, 500, 'star');
+	var star = stars.create(670, 500, 'star');
+	var star = stars.create(570, 500, 'star');
+	var star = stars.create(470, 500, 'star');
+	var star = stars.create(370, 500, 'star');
+	var star = stars.create(270, 500, 'star');
+	var star = stars.create(170, 500, 'star');
+	var star = stars.create(70, 500, 'star');
 	//  Let gravity do its thing
-        star.body.gravity.y = 300;
+//        star.body.gravity.y = 300;
 
     scoreText = game.add.text(684, 16, 'Lap: 0', { fontSize: '32px', fill: '#000' });
     timerText = game.add.text(16, 16, '00:00:00', { fontSize: '32px', fill: '#000' });
@@ -127,9 +167,7 @@ function blinkTimer() {
 
 function update() {
 
-	game.camera.y = player.body.y;
-	game.camera.x = player.body.x;
-	
+	game.camera.focusOnXY(player.x, player.y);	
 
 	halfSecondCounter += game.time.elapsed;
 	if (stars.countLiving() > 0) {
