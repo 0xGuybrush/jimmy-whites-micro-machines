@@ -19,37 +19,40 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create
 function preload() {
     game.load.image('sky', 'assets/sky.png');
     game.load.image('ground', 'assets/platform.png');
-    game.load.image('star', 'assets/star.png');
+    game.load.image('checkpoint', 'assets/star.png');
     game.load.image('car', 'assets/car.png');
 }
 
-var player;
+var playerOne;
+var playerTwo;
+
 var platforms;
 var cursors;
+var wasd;
 
-var stars;
+var checkpoints;
 var score = 0;
 var scoreText;
 var milliseconds = 0;
 var seconds = 0;
 var minutes = 0;
 var timerText = "";
-var gameStarted = 0;
+var gameCheckpointted = 0;
 var halfSecondCounter = 0;
-var speed = 0;
-var turningSpeed = 5;
+var playerOneSpeed = 0;
+var playerOneTurningSpeed = 5;
+var playerTwoSpeed = 0;
+var playerTwoTurningSpeed = 5;
+
 var MAX_SPEED = 80;
 var MAX_REVERSE = -30;//(MAX_SPEED * 0.375); //Just felt about right
 var RATE_OF_ACCELERATION = 1;
 var RATE_OF_DECELERATION = 3;
 
-var starID = 1;
-var nextStar = 1;
+var nextCheckpoint = 0;
 
-function createStar(stars, x, y) {
-	var star = stars.create(x, y, 'star');
-	star.name = starID;
-	starID++;
+function createCheckpoint(checkpoints, x, y) {
+	var checkpoint = checkpoints.create(x, y, 'checkpoint');
 }
 
 function createLedge(platforms, x) {
@@ -64,7 +67,7 @@ function createLedge(platforms, x) {
 }
 
 function create() {
-	gameStarted = game.time.now;
+	gameCheckpointted = game.time.now;
     //  We're going to be using physics, so enable the Arcade Physics system
     game.physics.startSystem(Phaser.Physics.ARCADE);
     game.world.setBounds(0, 0, 2000, 600);
@@ -74,6 +77,7 @@ function create() {
 
     //  The platforms group contains the ground and the 2 ledges we can jump on
     platforms = game.add.group();
+    players = game.add.group();
 
     //  We will enable physics for any object that is created in this group
     platforms.enableBody = true;
@@ -94,38 +98,57 @@ function create() {
     ledge = platforms.create(-150, 350, 'ground');
     ledge.body.immovable = true; 
     
-    // The player and its settings
-    player = game.add.sprite(32, game.world.height - 150, 'car');
-	player.anchor.setTo(0.5, 0.5);
-    //  We need to enable physics on the player
-    game.physics.arcade.enable(player);
+    // The playerOne and its settings
+    playerOne = players.create(32, game.world.height - 150, 'car');
+    playerOne.name = 'spider';
+    playerTwo = players.create(80, game.world.height - 150, 'car');
+    playerTwo.name = 'walter';	
+        
+	playerOne.anchor.setTo(0.5, 0.5);
+    //  We need to enable physics on the playerOne
+    game.physics.arcade.enable(playerOne);
+
+
+	playerTwo.anchor.setTo(0.5, 0.5);
+    //  We need to enable physics on the playerOne
+    game.physics.arcade.enable(playerTwo);
 
     //  Player physics properties. Give the little guy a slight bounce.
-   	player.body.bounce.y = 0.2;
-    player.body.gravity.y = 1;
-    player.body.collideWorldBounds = true;
+   	playerOne.body.bounce.y = 0.2;
+    playerOne.body.gravity.y = 1;
+    playerOne.body.collideWorldBounds = true;
+    
+    playerTwo.body.bounce.y = 0.2;
+    playerTwo.body.gravity.y = 1;
+    playerTwo.body.collideWorldBounds = true;
 
-    //  Finally some stars to collect
-	 stars = game.add.group();
+    //  Finally some checkpoints to collect
+	 checkpoints = game.add.group();
 
-    //  We will enable physics for any star that is created in this group
-    stars.enableBody = true;
-	createStar(stars, 100, 100);
-	createStar(stars, 1900, 100);
-	createStar(stars, 1900, 500);	
-	createStar(stars, 100, 500);
+    //  We will enable physics for any checkpoint that is created in this group
+    checkpoints.enableBody = true;
+	createCheckpoint(checkpoints, 100, 100);
+	createCheckpoint(checkpoints, 1900, 100);
+	createCheckpoint(checkpoints, 1900, 500);	
+	createCheckpoint(checkpoints, 100, 500);
 	//  Let gravity do its thing
 
 
     scoreText = game.add.text(684, 16, 'Lap: 0', { fontSize: '32px', fill: '#000' });
     timerText = game.add.text(16, 16, '00:00:00', { fontSize: '32px', fill: '#000' });
     //  Our controls.
-    cursors = game.input.keyboard.createCursorKeys();    
+    cursors = game.input.keyboard.createCursorKeys(); 
+	wasd = {
+		up: game.input.keyboard.addKey(Phaser.Keyboard.W),
+		down: game.input.keyboard.addKey(Phaser.Keyboard.S),
+		left: game.input.keyboard.addKey(Phaser.Keyboard.A),
+		right: game.input.keyboard.addKey(Phaser.Keyboard.D)
+    };
 }
 
 function updateTimer() {
  	
- 	var elapsed = game.time.elapsedSince(gameStarted)
+ 	var elapsed = game.time.elapsedSince(gameCheckpointted)
     minutes = Math.floor(elapsed / 60000) % 60;
     seconds = Math.floor(elapsed / 1000) % 60;
     milliseconds = Math.floor(elapsed) % 100;
@@ -150,48 +173,133 @@ function blinkTimer() {
 	}
 }
 
-
-function update() {
-
-	game.camera.focusOnXY(player.x, player.y);	
-
-	halfSecondCounter += game.time.elapsed;
-	if (stars.countLiving() > 0) {
-		updateTimer();
-	} else {
-		if (score >= 3) { 
-			blinkTimer();
-		} else {
-			createStar(stars, 100, 100);
-			createStar(stars, 1900, 100);
-			createStar(stars, 1900, 500);	
-			createStar(stars, 100, 500);
-		
-			score += 1;
-		    scoreText.text = 'Lap: ' + score;
-		}
-	}
-
-    //  Collide the player and the stars with the platforms
-    game.physics.arcade.collide(player, platforms);
-    game.physics.arcade.collide(stars, platforms);
-
-    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
-    game.physics.arcade.overlap(player, stars, collectStar, null, this);
-    game.physics.arcade.overlap(player, platforms, collectStar, null, this);
-
-    //  Reset the players velocity (movement)
-   	
-	drive(player);
-    
-
+function distanceBetweenTwoElements(elementA, elementB) {
+	return (elementA.x - elementB.x) + (elementA.y - elementB.y);
 }
 
-function drive(player) {
-	player.body.angularVelocity = 0;
-    player.body.velocity.y = 0;
-    player.body.velocity.x = 0;	
-	var angle = player.angle;
+function playerInTheLead() {
+	var nextCheckpointElement = checkpoints.getAt(nextCheckpoint);
+	var distanceFromPlayerOneToCheckpoint = distanceBetweenTwoElements(nextCheckpointElement, playerOne);
+	var distanceFromPlayerTwoToCheckpoint = distanceBetweenTwoElements(nextCheckpointElement, playerTwo);
+	
+	if (distanceFromPlayerOneToCheckpoint < distanceFromPlayerTwoToCheckpoint) {
+		return playerOne;
+	} else {
+		return playerTwo;
+	}
+}
+
+
+function update() {
+	if (!game.pause) {
+		var yellowShirt = playerInTheLead();
+		/*if (game.camera.target != yellowShirt) {
+			game.add.tween(game.camera).to( {x: yellowShirt.x, y: yellowShirt.y}, 30, Phaser.Easing.Quadratic.InOut, true);		
+		} else {*/
+			game.camera.focusOn(yellowShirt);
+	//	}
+	
+		if(!playerOne.inCamera) {
+			game.pause = true;
+			console.log('Point to ' + playerTwo.name + '!');
+			//playerOne.kill();
+			game.pause = false;
+		}
+		
+		if(!playerTwo.inCamera) {
+			game.pause = true;
+			console.log('Point to ' + playerOne.name + '!');
+			//playerOne.kill();
+			game.pause = false;
+		}
+	
+	
+		halfSecondCounter += game.time.elapsed;
+		if (checkpoints.countLiving() > 0) {
+			updateTimer();
+		} else {
+			if (score >= 3) { 
+				blinkTimer();
+			} else {
+				createCheckpoint(checkpoints, 100, 100);
+				createCheckpoint(checkpoints, 1900, 100);
+				createCheckpoint(checkpoints, 1900, 500);	
+				createCheckpoint(checkpoints, 100, 500);
+			
+				score += 1;
+				scoreText.text = 'Lap: ' + score;
+			}
+		}
+	
+		//  Collide the playerOne and the checkpoints with the platforms
+		game.physics.arcade.collide(playerOne, platforms);
+		game.physics.arcade.collide(checkpoints, platforms);
+	
+		//  Checks to see if the playerOne overlaps with any of the checkpoints, if he does call the collectCheckpoint function
+		game.physics.arcade.overlap(playerOne, checkpoints, collectCheckpoint, null, this);
+		game.physics.arcade.overlap(playerOne, platforms, collectCheckpoint, null, this);
+	
+		//  Reset the playerOnes velocity (movement)
+		
+		drive(playerOne);
+		playerTwo.body.angularVelocity = 0;
+		playerTwo.body.velocity.y = 0;
+		playerTwo.body.velocity.x = 0;	
+		var angle = playerTwo.angle;
+		var radians = (Math.PI / 180) * ( angle - 90 ); 
+		
+		if (angle == 0 ) {
+			angle = 1;
+		} else if (angle < 0) {
+			angle += 360;
+		}
+		
+		if(wasd.up.isDown) {	
+			if (playerTwoSpeed < MAX_SPEED && !cursors.down.isDown) {
+				playerTwoSpeed += RATE_OF_ACCELERATION;
+			}
+		}
+		
+		if (wasd.down.isDown) {
+			if (playerTwoSpeed > MAX_REVERSE) {	
+				playerTwoSpeed--;
+			}
+		} 
+		
+		if (wasd.down.isUp && wasd.up.isUp) {
+			if (playerTwoSpeed > 0) {
+				playerTwoSpeed -= RATE_OF_DECELERATION;
+			} 
+			
+			if (playerTwoSpeed < 0) {
+				playerTwoSpeed += RATE_OF_ACCELERATION;
+			}
+		} 
+		
+		
+		if (wasd.left.isDown) {
+			playerTwo.angle -= playerTwoTurningSpeed;
+		}
+		
+		if (wasd.right.isDown) {
+			playerTwo.angle += playerTwoTurningSpeed;
+		}
+	
+	   
+		playerTwo.body.x = playerTwo.body.x + playerTwoSpeed/10 * Math.cos(radians);
+		playerTwo.body.y = playerTwo.body.y + playerTwoSpeed/10 * Math.sin(radians);
+	}
+}
+
+
+
+
+
+function drive(playerOne) {
+	playerOne.body.angularVelocity = 0;
+    playerOne.body.velocity.y = 0;
+    playerOne.body.velocity.x = 0;	
+	var angle = playerOne.angle;
     var radians = (Math.PI / 180) * ( angle - 90 ); 
     
     if (angle == 0 ) {
@@ -201,46 +309,45 @@ function drive(player) {
     }
     
     if(cursors.up.isDown) {	
-    	if (speed < MAX_SPEED && !cursors.down.isDown) {
-    		speed += RATE_OF_ACCELERATION;
+    	if (playerOneSpeed < MAX_SPEED && !cursors.down.isDown) {
+    		playerOneSpeed += RATE_OF_ACCELERATION;
     	}
     }
     
     if (cursors.down.isDown) {
-    	if (speed > MAX_REVERSE) {	
-    		speed--;
+    	if (playerOneSpeed > MAX_REVERSE) {	
+    		playerOneSpeed--;
     	}
     } 
     
     if (cursors.down.isUp && cursors.up.isUp) {
-    	if (speed > 0) {
-    		speed -= RATE_OF_DECELERATION;
+    	if (playerOneSpeed > 0) {
+    		playerOneSpeed -= RATE_OF_DECELERATION;
     	} 
     	
-    	if (speed < 0) {
-    		speed += RATE_OF_ACCELERATION;
+    	if (playerOneSpeed < 0) {
+    		playerOneSpeed += RATE_OF_ACCELERATION;
     	}
     } 
     
     
     if (cursors.left.isDown) {
-        player.angle -= turningSpeed;
+        playerOne.angle -= playerOneTurningSpeed;
     }
     
     if (cursors.right.isDown) {
-        player.angle += turningSpeed;
+        playerOne.angle += playerOneTurningSpeed;
     }
 
    
-    player.body.x = player.body.x + speed/10 * Math.cos(radians);
-  	player.body.y = player.body.y + speed/10 * Math.sin(radians);
+    playerOne.body.x = playerOne.body.x + playerOneSpeed/10 * Math.cos(radians);
+  	playerOne.body.y = playerOne.body.y + playerOneSpeed/10 * Math.sin(radians);
 }
 
-function collectStar (player, star) {
-	if(star.name == nextStar) {
-		console.log(star.name + " collected");
-    	star.kill();   
-	    nextStar++;
+function collectCheckpoint (playerOne, checkpoint) {
+	if(checkpoint == checkpoints.getAt(nextCheckpoint)) {
+    	checkpoint.kill();   
+	    nextCheckpoint++;
 	}
 }
 </script>
