@@ -26,7 +26,6 @@ function preload() {
 var playerOne;
 var playerTwo;
 
-var platforms;
 var cursors;
 var wasd;
 
@@ -37,7 +36,7 @@ var milliseconds = 0;
 var seconds = 0;
 var minutes = 0;
 var timerText = "";
-var gameCheckpointted = 0;
+var gameStarted = 0;
 var halfSecondCounter = 0;
 var playerOneSpeed = 0;
 var playerOneTurningSpeed = 5;
@@ -55,19 +54,8 @@ function createCheckpoint(checkpoints, x, y) {
 	var checkpoint = checkpoints.create(x, y, 'checkpoint');
 }
 
-function createLedge(platforms, x) {
-	// Here we create the ground.
-    var ground = platforms.create(x, game.world.height - 64, 'ground');
-    
-    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    ground.scale.setTo(2, 2);
-
-    //  This stops it from falling away when you jump on it
-    ground.body.immovable = true;
-}
-
 function create() {
-	gameCheckpointted = game.time.now;
+	gameStarted = game.time.now;
     //  We're going to be using physics, so enable the Arcade Physics system
     game.physics.startSystem(Phaser.Physics.ARCADE);
     game.world.setBounds(0, 0, 2000, 600);
@@ -75,52 +63,31 @@ function create() {
     //  A simple background for our game
  	 game.add.sprite(0, 0, 'sky');
 
-    //  The platforms group contains the ground and the 2 ledges we can jump on
-    platforms = game.add.group();
     players = game.add.group();
-
-    //  We will enable physics for any object that is created in this group
-    platforms.enableBody = true;
-	createLedge(platforms, 0);
-	createLedge(platforms, 400);
-	createLedge(platforms, 800);
-	createLedge(platforms, 1200);
-	createLedge(platforms, 1600);
-
-
-    //  Now let's create two ledges
-    var ledge = platforms.create(400, 400, 'ground');
-    ledge.body.immovable = true;
-
-    ledge = platforms.create(-150, 250, 'ground');
-    ledge.body.immovable = true;
-    
-    ledge = platforms.create(-150, 350, 'ground');
-    ledge.body.immovable = true; 
     
     // The playerOne and its settings
     playerOne = players.create(32, game.world.height - 150, 'car');
     playerOne.name = 'spider';
-    playerTwo = players.create(80, game.world.height - 150, 'car');
-    playerTwo.name = 'walter';	
+  //  playerTwo = players.create(80, game.world.height - 150, 'car');
+   // playerTwo.name = 'walter';	
         
 	playerOne.anchor.setTo(0.5, 0.5);
     //  We need to enable physics on the playerOne
     game.physics.arcade.enable(playerOne);
 
 
-	playerTwo.anchor.setTo(0.5, 0.5);
+//	playerTwo.anchor.setTo(0.5, 0.5);
     //  We need to enable physics on the playerOne
-    game.physics.arcade.enable(playerTwo);
+ //   game.physics.arcade.enable(playerTwo);
 
     //  Player physics properties. Give the little guy a slight bounce.
-   	playerOne.body.bounce.y = 0.2;
-    playerOne.body.gravity.y = 1;
+//   	playerOne.body.bounce.y = 0;
+ //   playerOne.body.gravity.y = 0;
     playerOne.body.collideWorldBounds = true;
     
-    playerTwo.body.bounce.y = 0.2;
-    playerTwo.body.gravity.y = 1;
-    playerTwo.body.collideWorldBounds = true;
+  /*  playerTwo.body.bounce.y = 0;
+    playerTwo.body.gravity.y = 0;
+    playerTwo.body.collideWorldBounds = false;
 
     //  Finally some checkpoints to collect
 	 checkpoints = game.add.group();
@@ -143,12 +110,26 @@ function create() {
 		down: game.input.keyboard.addKey(Phaser.Keyboard.S),
 		left: game.input.keyboard.addKey(Phaser.Keyboard.A),
 		right: game.input.keyboard.addKey(Phaser.Keyboard.D)
-    };
+    };*/
+    
+    playerOne.body.velocity.x = 0;
+    playerOne.body.velocity.y = 0;
+    playerOne.body.angularVelocity = 0;
+    	
+    game.add.tween(playerOne).to({x: 100, y: 100}, 
+    	1000 /*duration of the tween (in ms)*/, 
+	    Phaser.Easing.Linear.None /*easing type*/, 
+	    true /*autostart?*/, 
+0 /*delay*/, 
+    	true /*yoyo?*/).start(2000);
+    	playerOne.body.velocity.x = 0;
+    	playerOne.body.velocity.y = 0;
+    	playerOne.body.angularVelocity = 0;
 }
 
 function updateTimer() {
  	
- 	var elapsed = game.time.elapsedSince(gameCheckpointted)
+ 	var elapsed = game.time.elapsedSince(gameStarted)
     minutes = Math.floor(elapsed / 60000) % 60;
     seconds = Math.floor(elapsed / 1000) % 60;
     milliseconds = Math.floor(elapsed) % 100;
@@ -190,28 +171,49 @@ function playerInTheLead() {
 }
 
 
-function update() {
-	if (!game.pause) {
+function update() {}
+/*
 		var yellowShirt = playerInTheLead();
 		/*if (game.camera.target != yellowShirt) {
 			game.add.tween(game.camera).to( {x: yellowShirt.x, y: yellowShirt.y}, 30, Phaser.Easing.Quadratic.InOut, true);		
 		} else {*/
 			game.camera.focusOn(yellowShirt);
 	//	}
-	
-		if(!playerOne.inCamera) {
-			game.pause = true;
-			console.log('Point to ' + playerTwo.name + '!');
+/*
+		if(!playerOne.inCamera && !game.pause && playerTwo == yellowShirt) {
+	/*		game.pause = true;
+			playerOne.x = playerTwo.x;
+			playerOne.y = playerTwo.y;
+			var pointLabel = this.add.text(game.camera.width / 2, game.camera.height / 2, "Point to " + playerTwo.name + "!", 
+			{font: "10px Arial", fill: "#ffffff", stroke: '#000000', strokeThickness: 2});
+		 /*   var tween = this.add.tween(pointLabel).delay(100).to({y: pointLabel.y-100}, 1000, Phaser.Easing.Linear.None).start();
+		    tween.onComplete.add(function() {
+				pointLabel.destroy();
+			}, this); */
+			//game.add.tween(playerTwo).to({x: (game.camera.x + game.camera.width / 2), y: (game.camera.y + game.camera.height / 2)}, 30, Phaser.Easing.Quadratic.InOut, true);
+		//	game.add.tween(playerOne).to({x: playerTwo.x, y: playerTwo.y + 16}, 30, Phaser.Easing.Quadratic.InOut, true);
+			
 			//playerOne.kill();
-			game.pause = false;
-		}
-		
-		if(!playerTwo.inCamera) {
-			game.pause = true;
-			console.log('Point to ' + playerOne.name + '!');
+/*			pointLabel.destroy();
+			game.pause = false; */
+	//	}
+		/*
+		if(!playerTwo.inCamera && !game.pause && playerOne == yellowShirt) {
+	/*		game.pause = true;
+			playerTwo.x = playerOne.x;
+			playerTwo.y = playerOne.y;
+			var pointLabel = this.add.text(game.camera.width / 2, game.camera.height / 2, "Point to " + playerOne.name + "!", 
+			{font: "10px Arial", fill: "#ffffff", stroke: '#000000', strokeThickness: 2});
+/*		    var tween = this.add.tween(pointLabel).delay(100).to({y: pointLabel.y-100}, 1000, Phaser.Easing.Linear.None).start();
+		    tween.onComplete.add(function() {
+				pointLabel.destroy();
+			}, this); */
+			//game.add.tween(playerTwo).to({x: (game.camera.x + game.camera.width / 2), y: (game.camera.y + game.camera.height / 2)}, 30, Phaser.Easing.Quadratic.InOut, true);
+//			game.add.tween(playerTwo).to({x: playerOne.x, y: playerOne.y + 16}, 30, Phaser.Easing.Quadratic.InOut, true);
+		//	pointLabel.destroy();		
 			//playerOne.kill();
-			game.pause = false;
-		}
+		//	game.pause = false; */
+/*		}
 	
 	
 		halfSecondCounter += game.time.elapsed;
@@ -231,13 +233,10 @@ function update() {
 			}
 		}
 	
-		//  Collide the playerOne and the checkpoints with the platforms
-		game.physics.arcade.collide(playerOne, platforms);
-		game.physics.arcade.collide(checkpoints, platforms);
 	
 		//  Checks to see if the playerOne overlaps with any of the checkpoints, if he does call the collectCheckpoint function
 		game.physics.arcade.overlap(playerOne, checkpoints, collectCheckpoint, null, this);
-		game.physics.arcade.overlap(playerOne, platforms, collectCheckpoint, null, this);
+		game.physics.arcade.overlap(playerTwo, checkpoints, collectCheckpoint, null, this);
 	
 		//  Reset the playerOnes velocity (movement)
 		
@@ -288,8 +287,8 @@ function update() {
 	   
 		playerTwo.body.x = playerTwo.body.x + playerTwoSpeed/10 * Math.cos(radians);
 		playerTwo.body.y = playerTwo.body.y + playerTwoSpeed/10 * Math.sin(radians);
-	}
-}
+		*/
+//}
 
 
 
