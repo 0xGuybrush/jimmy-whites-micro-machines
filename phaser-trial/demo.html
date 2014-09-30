@@ -63,29 +63,23 @@ function create() {
     
     // The playerOne and its settings
     playerOne = players.create(32, game.world.height - 150, 'car');
-    playerOne.name = 'spider';
-  //  playerTwo = players.create(80, game.world.height - 150, 'car');
-   // playerTwo.name = 'walter';	
-        
-	playerOne.anchor.setTo(0.5, 0.5);
-    //  We need to enable physics on the playerOne
-    game.physics.arcade.enable(playerOne);
 
+    game.physics.arcade.enable(playerOne);
+	game.physics.arcade.gravity.y = 0;
+
+	playerOne.body.gravity.y = 0;
+	playerOne.body.allowGravity = false;
     playerOne.body.collideWorldBounds = true;
  
     playerOne.body.velocity.x = 0;
     playerOne.body.velocity.y = 0;
     playerOne.body.angularVelocity = 0;
-    	
-    game.add.tween(playerOne).to({x: 100, y: 100}, 
-    	1000 /*duration of the tween (in ms)*/, 
-	    Phaser.Easing.Linear.None /*easing type*/, 
-	    true /*autostart?*/, 
-0 /*delay*/, 
-    	true /*yoyo?*/).start(2000);
-    	playerOne.body.velocity.x = 0;
-    	playerOne.body.velocity.y = 0;
-    	playerOne.body.angularVelocity = 0;
+
+    game.add.tween(playerOne.body).to({ x: 200 }, 1000).start()
+    playerOne.x = 100;
+    playerOne.body.velocity.x = 0;
+    playerOne.body.velocity.y = 0;
+    playerOne.body.angularVelocity = 0;
 }
 
 function update(){}
