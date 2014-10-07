@@ -37,6 +37,7 @@ var milliseconds = 0;
 var seconds = 0;
 var minutes = 0;
 var timerText = "";
+var pointText = "";
 var gameCheckpointted = 0;
 var halfSecondCounter = 0;
 var playerOneSpeed = 0;
@@ -50,6 +51,11 @@ var RATE_OF_ACCELERATION = 1;
 var RATE_OF_DECELERATION = 3;
 
 var nextCheckpoint = 0;
+var playerOnePoints = 3;
+var playerTwoPoints = 3;
+var playerOnePointsDisplay;
+var playerTwoPointsDisplay;
+
 
 function createCheckpoint(checkpoints, x, y) {
 	var checkpoint = checkpoints.create(x, y, 'checkpoint');
@@ -100,9 +106,9 @@ function create() {
     
     // The playerOne and its settings
     playerOne = players.create(32, game.world.height - 150, 'car');
-    playerOne.name = 'spider';
+    playerOne.name = 'Spider';
     playerTwo = players.create(80, game.world.height - 150, 'car');
-    playerTwo.name = 'walter';	
+    playerTwo.name = 'Walter';	
         
 	playerOne.anchor.setTo(0.5, 0.5);
     //  We need to enable physics on the playerOne
@@ -135,7 +141,14 @@ function create() {
 
 
     scoreText = game.add.text(684, 16, 'Lap: 0', { fontSize: '32px', fill: '#000' });
+    playerOnePointsDisplay = game.add.text(684, 48, playerOne.name + ': ' + playerOnePoints, { fontSize: '32px', fill: '#000' });
+    playerTwoPointsDisplay = game.add.text(684, 80, playerTwo.name + ': ' + playerTwoPoints, { fontSize: '32px', fill: '#000' });	
     timerText = game.add.text(16, 16, '00:00:00', { fontSize: '32px', fill: '#000' });
+
+    pointText = game.add.text(game.camera.x + game.camera.width/2, 
+    						  game.camera.y + game.camera.height/2, 
+    						  '', 
+    						  { fontSize: '32px', fill: '#000' });
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys(); 
 	wasd = {
@@ -189,8 +202,16 @@ function playerInTheLead() {
 	}
 }
 
+function unpause() {
+	playerOneSpeed = 0;
+	playerTwoSpeed = 0;
+	pointText.text = '';	
+	game.pause = false;	
+}
+
 
 function update() {
+
 	if (!game.pause) {
 		var yellowShirt = playerInTheLead();
 		/*if (game.camera.target != yellowShirt) {
@@ -201,23 +222,43 @@ function update() {
 	
 		if(!playerOne.inCamera) {
 			game.pause = true;
-			console.log('Point to ' + playerTwo.name + '!');
-			//playerOne.kill();
-			game.pause = false;
+			pointText.text = 'Point to ' + playerTwo.name + '!';
+			playerTwoPoints++;
+			playerOnePoints--;
+			
+			playerOnePointsDisplay.text = playerOne.name + ': ' + playerOnePoints;
+			playerTwoPointsDisplay.text = playerTwo.name + ': ' + playerTwoPoints;
+			var lastCheckpoint = checkpoints.getAt(nextCheckpoint -1);
+			game.add.tween(playerOne.body).to({ x: lastCheckpoint.x, y: lastCheckpoint.y - 50 }, 1000).start();
+			game.add.tween(playerTwo.body).to({  x: lastCheckpoint.x, y: lastCheckpoint.y + 50 }, 1000).start();	
+			game.add.tween(playerOne).to({ angle: playerTwo.angle }, 1000).start().onComplete.add(unpause);				
 		}
 		
 		if(!playerTwo.inCamera) {
 			game.pause = true;
-			console.log('Point to ' + playerOne.name + '!');
-			//playerOne.kill();
-			game.pause = false;
+			pointText.text = 'Point to ' + playerOne.name + '!';
+			playerTwoPoints--;
+			playerOnePoints++;
+			
+			playerOnePointsDisplay.text = playerOne.name + ': ' + playerOnePoints;
+			playerTwoPointsDisplay.text = playerTwo.name + ': ' + playerTwoPoints;
+			var lastCheckpoint = checkpoints.getAt(nextCheckpoint -1);
+			game.add.tween(playerOne.body).to({ x: lastCheckpoint.x, y: lastCheckpoint.y - 50 }, 1000).start();
+			game.add.tween(playerTwo.body).to({  x: lastCheckpoint.x, y: lastCheckpoint.y + 50 }, 1000).start();	
+			game.add.tween(playerTwo).to({ angle: playerOne.angle }, 1000).start().onComplete.add(unpause);					
 		}
 	
 	
 		halfSecondCounter += game.time.elapsed;
-		if (checkpoints.countLiving() > 0) {
+		if (checkpoints.countLiving() > 0 && playerOnePoints > 0 & playerTwoPoints > 0) {
 			updateTimer();
 		} else {
+			if (playerOnePoints == 0) {
+				pointText = playerTwo.name + " wins!";
+			} else 	if (playerTwoPoints == 0) {
+				pointText = playerOne.name + " wins!";
+			}
+			
 			if (score >= 3) { 
 				blinkTimer();
 			} else {
