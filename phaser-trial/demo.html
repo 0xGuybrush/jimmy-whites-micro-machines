@@ -17,10 +17,11 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
-    game.load.image('sky', 'assets/sky.png');
-    game.load.image('ground', 'assets/platform.png');
-    game.load.image('checkpoint', 'assets/star.png');
-    game.load.image('car', 'assets/car.png');
+    // game.load.image('sky', 'assets/sky.png');
+    game.load.image('ground', 'assets/cue.png');
+    game.load.image('checkpoint', 'assets/white-ball.png');
+    game.load.image('car', 'assets/small-car.png');
+    game.load.image('snookerTable', 'assets/snooker-table.png');
 }
 
 var playerOne;
@@ -79,7 +80,7 @@ function create() {
     game.world.setBounds(0, 0, 2000, 600);
 
     //  A simple background for our game
- 	 game.add.sprite(0, 0, 'sky');
+ 	 game.add.sprite(0, 0, 'snookerTable');
 
     //  The platforms group contains the ground and the 2 ledges we can jump on
     platforms = game.add.group();
@@ -95,13 +96,13 @@ function create() {
 
 
     //  Now let's create two ledges
-    var ledge = platforms.create(400, 400, 'ground');
-    ledge.body.immovable = true;
+    // var ledge = platforms.create(400, 400, 'ground');
+    // ledge.body.immovable = true;
 
-    ledge = platforms.create(-150, 250, 'ground');
+    var ledge = platforms.create(150, 50, 'ground');
     ledge.body.immovable = true;
     
-    ledge = platforms.create(-150, 350, 'ground');
+    ledge = platforms.create(150, 450, 'ground');
     ledge.body.immovable = true; 
     
     // The playerOne and its settings
@@ -109,6 +110,7 @@ function create() {
     playerOne.name = 'Spider';
     playerTwo = players.create(80, game.world.height - 150, 'car');
     playerTwo.name = 'Walter';	
+
         
 	playerOne.anchor.setTo(0.5, 0.5);
     //  We need to enable physics on the playerOne
