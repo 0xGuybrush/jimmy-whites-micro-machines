@@ -2,7 +2,7 @@
 <html lang="en"> 
 <head> 
 	<meta charset="UTF-8" />
-    <title>Phaser - Making your first game, part 9</title>
+    <title>Jimmy White's Micromachines</title>
 	<script type="text/javascript" src="js/phaser.min.js"></script>
     <style type="text/css">
         body {
@@ -17,10 +17,10 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
-    // game.load.image('sky', 'assets/sky.png');
     game.load.image('ground', 'assets/cue.png');
     game.load.image('checkpoint', 'assets/white-ball.png');
     game.load.image('car', 'assets/small-car.png');
+    game.load.image('blueCar', 'assets/small-blueCar.png');
     game.load.image('snookerTable', 'assets/snooker-table.png');
 }
 
@@ -94,11 +94,6 @@ function create() {
 	createLedge(platforms, 1200);
 	createLedge(platforms, 1600);
 
-
-    //  Now let's create two ledges
-    // var ledge = platforms.create(400, 400, 'ground');
-    // ledge.body.immovable = true;
-
     var ledge = platforms.create(150, 50, 'ground');
     ledge.body.immovable = true;
     
@@ -108,7 +103,7 @@ function create() {
     // The playerOne and its settings
     playerOne = players.create(32, game.world.height - 150, 'car');
     playerOne.name = 'Spider';
-    playerTwo = players.create(80, game.world.height - 150, 'car');
+    playerTwo = players.create(80, game.world.height - 150, 'blueCar');
     playerTwo.name = 'Walter';	
 
         
@@ -142,15 +137,15 @@ function create() {
 	//  Let gravity do its thing
 
 
-    scoreText = game.add.text(684, 16, 'Lap: 0', { fontSize: '32px', fill: '#000' });
-    playerOnePointsDisplay = game.add.text(684, 48, playerOne.name + ': ' + playerOnePoints, { fontSize: '32px', fill: '#000' });
-    playerTwoPointsDisplay = game.add.text(684, 80, playerTwo.name + ': ' + playerTwoPoints, { fontSize: '32px', fill: '#000' });	
-    timerText = game.add.text(16, 16, '00:00:00', { fontSize: '32px', fill: '#000' });
+    scoreText = game.add.text(674, 32, 'Lap: 0', { fontSize: '32px', fill: '#fff' });
+    playerOnePointsDisplay = game.add.text(674, 64, playerOne.name + ': ' + playerOnePoints, { fontSize: '32px', fill: '#fff' });
+    playerTwoPointsDisplay = game.add.text(674, 96, playerTwo.name + ': ' + playerTwoPoints, { fontSize: '32px', fill: '#fff' });	
+    timerText = game.add.text(50, 32, '00:00:00', { fontSize: '32px', fill: '#fff' });
 
     pointText = game.add.text(game.camera.x + game.camera.width/2, 
     						  game.camera.y + game.camera.height/2, 
     						  '', 
-    						  { fontSize: '32px', fill: '#000' });
+    						  { fontSize: '32px', fill: '#fff' });
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys(); 
 	wasd = {
@@ -216,14 +211,12 @@ function update() {
 
 	if (!game.pause) {
 		var yellowShirt = playerInTheLead();
-		/*if (game.camera.target != yellowShirt) {
-			game.add.tween(game.camera).to( {x: yellowShirt.x, y: yellowShirt.y}, 30, Phaser.Easing.Quadratic.InOut, true);		
-		} else {*/
-			game.camera.focusOn(yellowShirt);
-	//	}
+		game.camera.focusOn(yellowShirt);
 	
 		if(!playerOne.inCamera) {
 			game.pause = true;
+			pointText.x = (game.camera.x + game.camera.width/2) - 7; 
+    		pointText.y = game.camera.y + game.camera.height/2;
 			pointText.text = 'Point to ' + playerTwo.name + '!';
 			playerTwoPoints++;
 			playerOnePoints--;
@@ -239,6 +232,8 @@ function update() {
 		if(!playerTwo.inCamera) {
 			game.pause = true;
 			pointText.text = 'Point to ' + playerOne.name + '!';
+			pointText.x = (game.camera.x + game.camera.width/2) - 7; 
+    		pointText.y = game.camera.y + game.camera.height/2;
 			playerTwoPoints--;
 			playerOnePoints++;
 			
@@ -276,11 +271,12 @@ function update() {
 	
 		//  Collide the playerOne and the checkpoints with the platforms
 		game.physics.arcade.collide(playerOne, platforms);
+		game.physics.arcade.collide(playerTwo, platforms);
 		game.physics.arcade.collide(checkpoints, platforms);
 	
 		//  Checks to see if the playerOne overlaps with any of the checkpoints, if he does call the collectCheckpoint function
 		game.physics.arcade.overlap(playerOne, checkpoints, collectCheckpoint, null, this);
-		game.physics.arcade.overlap(playerOne, platforms, collectCheckpoint, null, this);
+		game.physics.arcade.overlap(playerTwo, checkpoints, collectCheckpoint, null, this);	
 	
 		//  Reset the playerOnes velocity (movement)
 		
